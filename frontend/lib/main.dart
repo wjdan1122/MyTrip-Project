@@ -1,27 +1,21 @@
-// frontend/lib/main.dart
-
 import 'package:flutter/material.dart';
-// استدعاء شاشة الخط الزمني التي قمتِ بإنشائها
-import 'screens/timeline_screen.dart'; 
+import 'theme/app_theme.dart';
+import 'screens/trip_wizard_screen.dart';
 
 void main() {
-  runApp(const MyTripApp());
+  runApp(const MyApp());
 }
 
-class MyTripApp extends StatelessWidget {
-  const MyTripApp({Key? key}) : super(key: key);
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'MyTrip App',
-      debugShowCheckedModeBanner: false, // لإخفاء شريط الـ Debug الأحمر المزعج
-      theme: ThemeData(
-        primaryColor: Colors.blue,
-        scaffoldBackgroundColor: Colors.white,
-      ),
-      // هنا نخبر التطبيق أن الشاشة الرئيسية هي شاشة الخط الزمني
-      home: TimelineScreen(), 
+      title: 'MyTrip',
+      debugShowCheckedModeBanner: false,
+      theme: AppTheme.theme,
+      home: const TripWizardScreen(),
     );
   }
 }
