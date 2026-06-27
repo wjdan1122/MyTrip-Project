@@ -103,18 +103,38 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+          // Gradient Header Card
+          Container(
+            margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight, // Approximates 135deg
+                colors: [
+                  Color(0xFF0D2137),
+                  Color(0xFF163352),
+                  Color(0xFF1E4D7A),
+                ],
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0D2137).withValues(alpha: 0.35),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Your Itinerary',
                   style: TextStyle(
-                    fontSize: 24,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: Colors.white,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -124,62 +144,70 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                       '${widget.destination} · ${widget.companion} · ${widget.budget}',
                       style: TextStyle(
                         fontSize: 13,
-                        color: AppColors.textSecondary,
+                        color: Colors.white.withValues(alpha: 0.55),
                       ),
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: widget.onRestart,
                       child: Icon(
                         Icons.edit,
                         size: 16,
-                        color: AppColors.primary,
+                        color: Colors.white.withValues(alpha: 0.7),
                       ),
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+                // Day selector
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: List.generate(tripDays.length, (index) {
+                      final isActive = index == selectedDay;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: GestureDetector(
+                          onTap: () => setState(() => selectedDay = index),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isActive ? Colors.white : Colors.white.withValues(alpha: 0.10),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isActive ? Colors.transparent : Colors.white.withValues(alpha: 0.20),
+                              ),
+                              boxShadow: isActive
+                                  ? [
+                                      BoxShadow(
+                                        color: Colors.black.withValues(alpha: 0.1),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Text(
+                              'Day ${index + 1}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: isActive ? const Color(0xFF0D2137) : Colors.white.withValues(alpha: 0.70),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
 
-          // Day selector
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: List.generate(tripDays.length, (index) {
-                final isActive = index == selectedDay;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: GestureDetector(
-                    onTap: () => setState(() => selectedDay = index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: isActive ? AppColors.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(
-                          color: isActive ? AppColors.primary : AppColors.cardBorder,
-                        ),
-                      ),
-                      child: Text(
-                        'Day ${index + 1}',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: isActive ? Colors.white : AppColors.textSecondary,
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Places count + regenerate + reorder / Drag to reorder banner
+          // Reorder / Regenerate Day Plan
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: _isReordering
@@ -213,31 +241,26 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                   )
                 : Row(
                     children: [
-                      Text(
-                        '${currentDayPlaces.length} places planned',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => setState(() => _isReordering = true),
-                        icon: const Icon(Icons.swap_vert),
-                        color: AppColors.primary,
-                        tooltip: 'Reorder places',
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8),
+                        child: IconButton(
+                          onPressed: () => setState(() => _isReordering = true),
+                          icon: const Icon(Icons.swap_vert, size: 28),
+                          color: AppColors.primary,
+                          tooltip: 'Reorder places',
+                        ),
                       ),
+                      const Spacer(),
                       OutlinedButton.icon(
                         onPressed: _regenerateDay,
                         icon: const Icon(Icons.auto_awesome, size: 16),
                         label: const Text('Regenerate Day Plan'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppColors.primary,
-                          side: BorderSide(color: AppColors.primary.withValues(alpha: 0.3)),
+                          side: const BorderSide(color: AppColors.cardBorder),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
