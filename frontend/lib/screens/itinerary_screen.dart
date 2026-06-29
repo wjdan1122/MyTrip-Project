@@ -29,13 +29,13 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
   bool _isReordering = false;
 
   static const List<Color> _dotColors = [
-    Color(0xFFFF6B35),
-    Color(0xFF2C5E77),
-    Color(0xFF34A853),
-    Color(0xFFEA4335),
-    Color(0xFF9C27B0),
-    Color(0xFFFF9800),
-    Color(0xFF00BCD4),
+    Color(0xFF1B3A5C), // كحلي غامق
+    Color(0xFF1A4B6E),
+    Color(0xFF2E6B9E),
+    Color(0xFF1D3557),
+    Color(0xFF264B73),
+    Color(0xFF0F2E4A),
+    Color(0xFF1E4D78),
   ];
 
   static const List<Color> _cardColors = [
@@ -80,6 +80,107 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
         }
       }
     });
+  }
+
+  void _showPlaceDetail(BuildContext context, Map<String, dynamic> place, int colorIndex) {
+    final cardColor = _cardColors[colorIndex % _cardColors.length];
+    final dotColor = _dotColors[colorIndex % _dotColors.length];
+
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.55),
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Image area
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              child: Container(
+                height: 180,
+                color: cardColor,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Icon(
+                      Icons.photo_camera_outlined,
+                      size: 48,
+                      color: dotColor.withValues(alpha: 0.3),
+                    ),
+                    // Close button
+                    Positioned(
+                      top: 12,
+                      right: 12,
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(ctx).pop(),
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(Icons.close, size: 18, color: Color(0xFF1B3A5C)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Content
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    place['name'] as String,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1B3A5C),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.access_time, size: 14, color: dotColor),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatTime(place['time'] as String),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: dotColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    place['description'] as String,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF6B7280),
+                      height: 1.6,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   String _formatTime(String time24) {
@@ -279,8 +380,14 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                   if (newIndex > oldIndex) {
                     newIndex -= 1;
                   }
-                  final item = tripDays[selectedDay].removeAt(oldIndex);
-                  tripDays[selectedDay].insert(newIndex, item);
+                  // Keep times fixed — only swap name, description, and other content
+                  final currentDay = tripDays[selectedDay];
+                  final oldName = currentDay[oldIndex]['name'];
+                  final oldDesc = currentDay[oldIndex]['description'];
+                  final newName = currentDay[newIndex]['name'];
+                  final newDesc = currentDay[newIndex]['description'];
+                  currentDay[oldIndex] = Map.from(currentDay[oldIndex])..["name"] = newName..["description"] = newDesc;
+                  currentDay[newIndex] = Map.from(currentDay[newIndex])..["name"] = oldName..["description"] = oldDesc;
                 });
               },
               proxyDecorator: (child, index, animation) {
@@ -305,6 +412,7 @@ class _ItineraryScreenState extends State<ItineraryScreen> {
                   onDelete: () => _deletePlace(index),
                   onEditTime: () {},
                   onRegenerate: () {},
+                  onTap: () => _showPlaceDetail(context, place, colorIndex),
                 );
               },
             ),

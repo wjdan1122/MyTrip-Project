@@ -13,6 +13,7 @@ class PlaceTimelineCard extends StatelessWidget {
   final VoidCallback? onRegenerate;
   final bool isReordering;
   final int index;
+  final VoidCallback? onTap;
 
   const PlaceTimelineCard({
     super.key,
@@ -27,6 +28,7 @@ class PlaceTimelineCard extends StatelessWidget {
     this.onRegenerate,
     this.isReordering = false,
     this.index = 0,
+    this.onTap,
   });
 
   @override
@@ -87,7 +89,9 @@ class PlaceTimelineCard extends StatelessWidget {
           const SizedBox(width: 8),
           // Card
           Expanded(
-            child: Container(
+            child: GestureDetector(
+              onTap: isReordering ? null : onTap,
+              child: Container(
               margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
@@ -204,6 +208,7 @@ class PlaceTimelineCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],
